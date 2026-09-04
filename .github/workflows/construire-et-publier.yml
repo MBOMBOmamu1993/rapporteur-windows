@@ -1,0 +1,153 @@
+# L'application de bureau, Windows ET Mac, construite par GitHub Actions.
+#
+# À chaque poussée : les deux installateurs sont construits, puis chaque
+# application est LANCÉE sur sa machine (Windows et macOS) et photographiée —
+# les captures sont gardées en artefact : c'est ainsi qu'on vérifie qu'elle
+# s'ouvre et charge le site, sans Mac sous la main.
+#
+# Publier : « Run workflow » avec `publier = true` et une version → les deux
+# fichiers sont attachés à la Release `vX.Y.Z` (créée au besoin). Le site
+# pointe `releases/latest/download/Rapporteur-Setup.exe` et `/Rapporteur.dmg`.
+#
+# Signature macOS (facultative, sinon le .dmg est non signé et macOS demande
+# d'autoriser l'ouverture) — secrets : MAC_CERT_P12 (le .p12 en base64),
+# MAC_CERT_MDP, et pour la notarisation ASC_CLE_ID, ASC_EMETTEUR_ID, ASC_CLE_P8.
+name: Construire et publier
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version (doit être celle de package.json), ex. 0.6.0"
+        required: true
+        default: "0.6.0"
+      publier:
+        description: "Attacher les fichiers à la Release vVERSION"
+        type: boolean
+        default: false
+
+jobs:
+  windows:
+    name: Windows — installateur et lancement
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Construire l'installateur
+        run: npm run dist:win
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+      - name: Lancer l'application et la photographier
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force captures | Out-Null
+          $exe = Get-ChildItem dist\win-unpacked\Rapporteur.exe | Select-Object -First 1
+          $p = Start-Process -FilePath $exe.FullName -PassThru
+          Start-Sleep -Seconds 18
+          if ($p.HasExited) { Write-Error "l'application s'est fermée toute seule (code $($p.ExitCode))" }
+          Add-Type -AssemblyName System.Windows.Forms, System.Drawing
+          $b = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+          $bmp = New-Object System.Drawing.Bitmap $b.Width, $b.Height
+          $g = [System.Drawing.Graphics]::FromImage($bmp)
+          $g.CopyFromScreen($b.Location, [System.Drawing.Point]::Empty, $b.Size)
+          $bmp.Save("captures\windows-accueil.png")
+          Stop-Process -Id $p.Id -Force
+          Write-Host "capture prise, application arrêtée"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: windows-${{ github.run_number }}
+          path: |
+            dist/Rapporteur-Setup.exe
+            captures/
+
+  mac:
+    name: Mac — image disque et lancement
+    runs-on: macos-15
+    timeout-minutes: 40
+    env:
+      MAC_CERT_P12: ${{ secrets.MAC_CERT_P12 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - name: Importer le certificat Developer ID (si fourni)
+        if: ${{ env.MAC_CERT_P12 != '' }}
+        env:
+          MAC_CERT_MDP: ${{ secrets.MAC_CERT_MDP }}
+        run: |
+          echo "$MAC_CERT_P12" | base64 --decode > certificat.p12
+          security create-keychain -p banc banc.keychain
+          security default-keychain -s banc.keychain
+          security unlock-keychain -p banc banc.keychain
+          security import certificat.p12 -k banc.keychain -P "$MAC_CERT_MDP" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k banc banc.keychain
+          rm certificat.p12
+          echo "SIGNER=1" >> "$GITHUB_ENV"
+
+      - name: Construire l'image disque
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: ${{ env.SIGNER == '1' && 'true' || 'false' }}
+          # Notarisation par clé d'API App Store Connect, si elle est fournie.
+          APPLE_API_KEY_ID: ${{ secrets.ASC_CLE_ID }}
+          APPLE_API_ISSUER: ${{ secrets.ASC_EMETTEUR_ID }}
+          ASC_CLE_P8: ${{ secrets.ASC_CLE_P8 }}
+        run: |
+          if [ "$SIGNER" = "1" ] && [ -n "$ASC_CLE_P8" ]; then
+            printf '%s' "$ASC_CLE_P8" > "$RUNNER_TEMP/AuthKey.p8"
+            export APPLE_API_KEY="$RUNNER_TEMP/AuthKey.p8"
+            node -e "const fs=require('fs');const p=require('./package.json');p.build.mac.notarize=true;fs.writeFileSync('package.json',JSON.stringify(p,null,2))"
+          fi
+          npm run dist:mac
+
+      - name: Lancer l'application et la photographier
+        run: |
+          mkdir -p captures
+          app=$(find dist -name "Rapporteur.app" -maxdepth 3 -type d | head -1)
+          echo "application : $app"
+          open "$app"
+          sleep 20
+          pgrep -f "Rapporteur.app/Contents/MacOS/Rapporteur" > /dev/null && echo "processus vivant" || { echo "l'application ne tourne pas"; exit 1; }
+          screencapture -x captures/mac-accueil.png
+          osascript -e 'tell application "Rapporteur" to quit' || pkill -f "Rapporteur.app/Contents/MacOS/Rapporteur" || true
+          ls -la dist/*.dmg dist/*.zip
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mac-${{ github.run_number }}
+          path: |
+            dist/Rapporteur.dmg
+            dist/Rapporteur.zip
+            captures/
+
+  publier:
+    name: Attacher à la Release
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.publier }}
+    needs: [windows, mac]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: artefacts
+      - name: Publier
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          v="v${{ inputs.version }}"
+          gh release view "$v" >/dev/null 2>&1 || gh release create "$v" --title "Rapporteur ${{ inputs.version }}" --notes "Application de bureau Rapporteur — Windows (Rapporteur-Setup.exe) et Mac (Rapporteur.dmg)."
+          gh release upload "$v" --clobber artefacts/windows-*/dist/Rapporteur-Setup.exe artefacts/mac-*/dist/Rapporteur.dmg artefacts/mac-*/dist/Rapporteur.zip

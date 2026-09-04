@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.DS_Store
+# Jamais de certificat ni de clé ici.
+*.p12
+*.p8

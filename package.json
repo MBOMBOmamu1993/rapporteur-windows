@@ -1,0 +1,80 @@
+{
+  "name": "rapporteur-bureau",
+  "productName": "Rapporteur",
+  "version": "0.6.0",
+  "description": "Rapporteur pour Windows et Mac — vos réunions deviennent des comptes rendus.",
+  "main": "main.js",
+  "author": "Rapporteur <infos@lerapporteur.com>",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dist:win": "electron-builder --win",
+    "dist:mac": "electron-builder --mac",
+    "dist": "electron-builder --win --mac"
+  },
+  "devDependencies": {
+    "@electron/packager": "^20.3.0",
+    "electron": "^38.0.0",
+    "electron-builder": "^25.0.0"
+  },
+  "build": {
+    "appId": "com.lerapporteur.bureau",
+    "productName": "Rapporteur",
+    "win": {
+      "target": "nsis",
+      "icon": "icon.png",
+      "artifactName": "Rapporteur-Setup.${ext}"
+    },
+    "nsis": {
+      "oneClick": true,
+      "runAfterFinish": true,
+      "createDesktopShortcut": true,
+      "deleteAppDataOnUninstall": false
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "universal"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "universal"
+          ]
+        }
+      ],
+      "icon": "icon-mac.png",
+      "category": "public.app-category.productivity",
+      "artifactName": "Rapporteur.${ext}",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "entitlements.mac.plist",
+      "entitlementsInherit": "entitlements.mac.plist",
+      "extendInfo": {
+        "NSMicrophoneUsageDescription": "Rapporteur enregistre votre réunion par le microphone pour en rédiger le compte rendu.",
+        "NSAudioCaptureUsageDescription": "Rapporteur capte le son de votre réunion en ligne (Teams, Zoom) joué par l'ordinateur."
+      },
+      "notarize": false
+    },
+    "dmg": {
+      "artifactName": "Rapporteur.${ext}",
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "artifactName": "Rapporteur-${os}.${ext}"
+  }
+}

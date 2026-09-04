@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Rapporteur</title>
+<style>
+:root {
+  --navy: #141413; --navy-lift: #2E2D2A; --amber: #CC785C; --amber-lift: #D9906F;
+  --ground: #F0EEE6; --surface: #FAF9F5; --surface-alt: #F5F3EC;
+  --ink: #141413; --ink-soft: #6B6A65; --ink-faint: #8F8D85; --rule: #E0DDD2;
+  --shadow: 0 1px 2px rgba(20,20,19,.04), 0 12px 32px -14px rgba(20,20,19,.12);
+  --display: Georgia, "Iowan Old Style", "Times New Roman", serif;
+  --body: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --label: Bahnschrift, "DIN Alternate", "Segoe UI Semibold", var(--body);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --navy: #F0EEE6; --navy-lift: #FFFFFF; --amber: #E08D6D; --amber-lift: #EBA98D;
+    --ground: #141413; --surface: #1D1C1A; --surface-alt: #232220;
+    --ink: #F0EEE6; --ink-soft: #B5B2A8; --ink-faint: #8A877E; --rule: #33322E;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 32px -12px rgba(0,0,0,.6);
+  }
+}
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0; min-height: 100vh; background: var(--ground); color: var(--ink);
+  font-family: var(--body); font-size: 1.0425rem; line-height: 1.6;
+  display: flex; flex-direction: column; -webkit-font-smoothing: antialiased;
+}
+header { border-bottom: 1px solid var(--rule); background: var(--surface); }
+.bar {
+  max-width: 66rem; margin-inline: auto; min-height: 4.4rem; padding: 0 clamp(1.25rem, 4vw, 3rem);
+  display: flex; align-items: center; gap: 1rem;
+}
+.brand { display: flex; align-items: center; gap: .55rem; font-family: var(--display); font-size: 1.1rem; color: inherit; text-decoration: none; }
+nav { margin-left: auto; display: flex; gap: .2rem; font-size: .93rem; }
+nav a { color: var(--ink-soft); text-decoration: none; padding: .45rem .75rem; border-radius: 8px; }
+nav a:hover { color: var(--ink); background: var(--surface-alt); }
+
+main {
+  flex: 1; width: 100%; max-width: 66rem; margin-inline: auto;
+  padding: clamp(1.6rem, 4.5vw, 3.2rem) clamp(1.25rem, 4vw, 3rem);
+}
+.label { font-family: var(--label); font-size: .72rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--amber); }
+h1 { font-family: var(--display); font-weight: 400; margin: .45rem 0 .4rem; font-size: clamp(1.6rem, 3.4vw, 2.15rem); line-height: 1.2; }
+.sous { color: var(--ink-soft); max-width: 46rem; margin: 0 0 1.9rem; }
+
+.modes { display: grid; grid-template-columns: repeat(auto-fit, minmax(15.5rem, 1fr)); gap: 1rem; }
+.mode {
+  display: flex; flex-direction: column; gap: .55rem; text-align: left;
+  background: var(--surface); border: 1px solid var(--rule); border-radius: 12px;
+  box-shadow: var(--shadow); padding: 1.4rem 1.4rem 1.5rem;
+  color: inherit; text-decoration: none; cursor: pointer;
+  transition: transform .15s ease, border-color .15s ease;
+}
+.mode:hover { transform: translateY(-2px); border-color: var(--amber); }
+.mode:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.mode svg { color: var(--amber); }
+.mode b { font-family: var(--display); font-weight: 400; font-size: 1.22rem; }
+.mode span { color: var(--ink-soft); font-size: .93rem; line-height: 1.55; }
+
+/* Le pied de page en aplat sombre, comme sur toutes les pages du site. */
+footer { background: #141413; color: #B5B2A8; }
+.pied {
+  max-width: 66rem; margin-inline: auto; padding: 1.05rem clamp(1.25rem, 4vw, 3rem);
+  display: flex; gap: 1.4rem; font-size: .9rem; flex-wrap: wrap;
+}
+.pied a { color: #FFFFFF; text-decoration: none; }
+.pied a:hover { text-decoration: underline; text-underline-offset: .3em; }
+.pied .v { margin-left: auto; color: #B5B2A8; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bar">
+    <span class="brand">
+      <svg width="24" height="24" viewBox="0 0 32 32" aria-hidden="true">
+        <rect width="32" height="32" rx="7" fill="var(--navy)"></rect>
+        <rect x="13" y="7" width="6" height="12" rx="3" fill="var(--amber-lift)"></rect>
+        <path d="M10 16a6 6 0 0 0 12 0M16 22v3" stroke="var(--amber-lift)" stroke-width="2" fill="none" stroke-linecap="round"></path>
+      </svg>
+      Rapporteur
+    </span>
+    <nav>
+      <a href="https://lerapporteur.com/personnaliser">Votre modèle</a>
+      <a href="https://lerapporteur.com/compte">Compte</a>
+      <a href="https://lerapporteur.com/tarifs">Tarifs</a>
+      <a href="https://lerapporteur.com/aide">Assistance</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <span class="label">Nouvel enregistrement</span>
+  <h1>Où se tient votre réunion ?</h1>
+  <p class="sous">
+    Choisissez, enregistrez, et repartez : le compte rendu s'écrit sur nos serveurs
+    et vous arrive par courriel.
+  </p>
+
+  <div class="modes">
+    <a class="mode" href="https://lerapporteur.com/enregistrer?mode=presentiel">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+        <rect x="9" y="2.5" width="6" height="11" rx="3"></rect>
+        <path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5v4" stroke-linecap="round"></path>
+      </svg>
+      <b>En salle</b>
+      <span>La réunion se tient en présentiel. Posez l'ordinateur au centre de la table :
+      le micro capte toute la salle, même sans connexion — l'envoi part quand le réseau revient.</span>
+    </a>
+
+    <a class="mode" href="https://lerapporteur.com/enregistrer">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+        <rect x="2.5" y="4" width="19" height="13" rx="2"></rect>
+        <path d="M8.5 21h7M12 17v4" stroke-linecap="round"></path>
+      </svg>
+      <b>En ligne</b>
+      <span>Teams, Zoom, Meet ou Skype — installés sur ce poste ou dans le navigateur.
+      Rapporteur capte vos correspondants et votre voix, sur deux pistes.</span>
+    </a>
+
+    <a class="mode" href="https://lerapporteur.com/enregistrer?mode=relecture">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+        <circle cx="12" cy="12" r="9"></circle>
+        <path d="M10 8.5l5.5 3.5-5.5 3.5z" fill="currentColor" stroke="none"></path>
+      </svg>
+      <b>Relecture</b>
+      <span>Vous avez déjà l'enregistrement d'une réunion ? Rejouez-le sur cet ordinateur :
+      Rapporteur le capte et le rédige comme une séance en direct.</span>
+    </a>
+  </div>
+</main>
+
+<footer>
+  <div class="pied">
+    <a href="https://lerapporteur.com/confidentialite">Confidentialité</a>
+    <span class="v" id="version"></span>
+  </div>
+</footer>
+
+<script>
+  /* La langue de la machine décide, comme sur le site : un système en
+     français lit le français, tout le reste lit l'anglais. Cet écran ne se
+     montre qu'hors connexion — il n'a pas accès au choix mémorisé sur le
+     site, la langue du système est le meilleur indice disponible. */
+  (function () {
+    var fr = (navigator.language || "fr").slice(0, 2).toLowerCase() === "fr";
+    if (fr) { return; }
+    document.documentElement.lang = "en";
+    var EN = [
+      ['nav a[href$="/personnaliser"]', "Your template"],
+      ['nav a[href$="/compte"]', "Account"],
+      ['nav a[href$="/tarifs"]', "Pricing"],
+      ['nav a[href$="/aide"]', "Support"],
+      [".label", "New recording"],
+      ["h1", "Where is your meeting taking place?"],
+      [".sous", "Choose, record, and get on with your day: the minutes are written on our servers and arrive by email."],
+      ['a[href$="mode=presentiel"] b', "In the room"],
+      ['a[href$="mode=presentiel"] span', "The meeting is held in person. Place the computer at the centre of the table: the microphone picks up the whole room, even without a connection — the upload leaves as soon as the network returns."],
+      ['a[href$="/enregistrer"] b', "Online"],
+      ['a[href$="/enregistrer"] span', "Teams, Zoom, Meet or Skype — installed on this computer or running in the browser. Rapporteur captures your participants and your voice on two separate tracks."],
+      ['a[href$="mode=relecture"] b', "Playback"],
+      ['a[href$="mode=relecture"] span', "Already have a recording of a meeting? Play it back on this computer: Rapporteur captures it and writes it up like a live session."],
+      ['footer a[href$="/confidentialite"]', "Privacy"]
+    ];
+    EN.forEach(function (paire) {
+      var el = document.querySelector(paire[0]);
+      if (el) { el.textContent = paire[1]; }
+    });
+  })();
+  if (window.rapporteurBureau && window.rapporteurBureau.version) {
+    document.getElementById("version").textContent = "Version " + window.rapporteurBureau.version;
+  }
+</script>
+
+</body>
+</html>

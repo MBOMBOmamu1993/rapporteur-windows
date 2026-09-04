@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Rapporteur — réservé aux clients</title>
+<style>
+:root {
+  --ground: #F0EEE6; --surface: #FAF9F5; --ink: #141413; --ink-soft: #6B6A65;
+  --amber: #CC785C; --rule: #E0DDD2;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --ground: #141413; --surface: #1D1C1A; --ink: #F0EEE6; --ink-soft: #B5B2A8; --amber: #E08D6D; --rule: #33322E; }
+}
+body {
+  margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: var(--ground); color: var(--ink);
+  font-family: "Segoe UI", system-ui, sans-serif; font-size: 1.0625rem; line-height: 1.6;
+}
+.carte {
+  width: min(92vw, 30rem); background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 12px; padding: 2.25rem; text-align: center;
+}
+h1 { font-family: Georgia, serif; font-weight: 400; font-size: 1.7rem; margin: 0 0 .8rem; }
+p { margin: 0 0 1.2rem; color: var(--ink-soft); }
+.label { font-family: Bahnschrift, "Segoe UI Semibold", sans-serif; font-size: .72rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--amber); }
+a.btn {
+  display: inline-block; background: var(--ink); color: var(--ground); text-decoration: none;
+  padding: .8rem 1.4rem; border-radius: 8px; font-weight: 600;
+}
+</style>
+</head>
+<body>
+  <div class="carte">
+    <span class="label">Application Windows</span>
+    <h1>Lancer une réunion demande d'être client</h1>
+    <p>
+      L'application — réunions en présentiel, Teams et Zoom installés sur le poste,
+      relecture d'un enregistrement — enregistre les réunions des abonnés (Basic, Pro, Max,
+      Entreprise) et des clients ayant acheté un lot de comptes rendus. Choisissez une formule
+      ou un lot pour continuer ici : votre compte reste entièrement utilisable en ligne, sur lerapporteur.com.
+    </p>
+    <a class="btn" href="https://lerapporteur.com/tarifs">Voir les formules</a>
+  </div>
+<script>
+  /* Même règle que sur le site : un système qui n'est pas en français lit
+     l'anglais. */
+  (function () {
+    if ((navigator.language || "fr").slice(0, 2).toLowerCase() === "fr") { return; }
+    document.documentElement.lang = "en";
+    document.title = "Rapporteur — customers only";
+    var EN = [
+      [".label", "Windows app"],
+      ["h1", "Starting a meeting requires a customer account"],
+      ["p", "The app — in-person meetings, Teams and Zoom installed on your computer, replay of an existing recording — records meetings for subscribers (Basic, Pro, Max, Enterprise) and for customers who bought a pack of meeting reports. Choose a plan or a pack to continue here: your account remains fully usable online at lerapporteur.com."],
+      ["a.btn", "See the plans"]
+    ];
+    EN.forEach(function (paire) {
+      var el = document.querySelector(paire[0]);
+      if (el) { el.textContent = paire[1]; }
+    });
+  })();
+</script>
+</body>
+</html>
