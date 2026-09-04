@@ -63,10 +63,12 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
+          name: captures-windows-${{ github.run_number }}
+          path: captures/
+      - uses: actions/upload-artifact@v4
+        with:
           name: windows-${{ github.run_number }}
-          path: |
-            dist/Rapporteur-Setup.exe
-            captures/
+          path: dist/Rapporteur-Setup.exe
 
   mac:
     name: Mac — image disque et lancement
@@ -126,11 +128,14 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
+          name: captures-mac-${{ github.run_number }}
+          path: captures/
+      - uses: actions/upload-artifact@v4
+        with:
           name: mac-${{ github.run_number }}
           path: |
             dist/Rapporteur.dmg
             dist/Rapporteur.zip
-            captures/
 
   publier:
     name: Attacher à la Release
@@ -150,4 +155,4 @@ jobs:
         run: |
           v="v${{ inputs.version }}"
           gh release view "$v" >/dev/null 2>&1 || gh release create "$v" --title "Rapporteur ${{ inputs.version }}" --notes "Application de bureau Rapporteur — Windows (Rapporteur-Setup.exe) et Mac (Rapporteur.dmg)."
-          gh release upload "$v" --clobber artefacts/windows-*/dist/Rapporteur-Setup.exe artefacts/mac-*/dist/Rapporteur.dmg artefacts/mac-*/dist/Rapporteur.zip
+          gh release upload "$v" --clobber artefacts/windows-*/Rapporteur-Setup.exe artefacts/mac-*/Rapporteur.dmg artefacts/mac-*/Rapporteur.zip
