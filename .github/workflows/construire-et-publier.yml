@@ -73,7 +73,11 @@ jobs:
   mac:
     name: Mac — image disque et lancement
     runs-on: macos-15
-    timeout-minutes: 40
+    # Quatre-vingt-dix minutes, et non quarante : la notarisation est une FILE
+    # D'ATTENTE chez Apple, dont on ne maîtrise pas la longueur. Le 08/09/2026,
+    # l'application universelle était signée en huit minutes et notarytool
+    # attendait encore trente-deux minutes plus tard, quand le délai a tranché.
+    timeout-minutes: 90
     env:
       MAC_CERT_P12: ${{ secrets.MAC_CERT_P12 }}
     steps:
