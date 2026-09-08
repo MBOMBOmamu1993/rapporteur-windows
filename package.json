@@ -1,7 +1,7 @@
 {
   "name": "rapporteur-bureau",
   "productName": "Rapporteur",
-  "version": "0.6.0",
+  "version": "1.1.5",
   "description": "Rapporteur pour Windows et Mac — vos réunions deviennent des comptes rendus.",
   "main": "main.js",
   "author": "Rapporteur <infos@lerapporteur.com>",

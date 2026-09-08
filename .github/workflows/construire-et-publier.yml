@@ -20,9 +20,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Version (doit être celle de package.json), ex. 0.6.0"
+        description: "Version (doit être celle de package.json), ex. 1.1.5"
         required: true
-        default: "0.6.0"
+        default: "1.1.5"
       publier:
         description: "Attacher les fichiers à la Release vVERSION"
         type: boolean
