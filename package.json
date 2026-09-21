@@ -28,9 +28,12 @@
     },
     "appx": {
       "applicationId": "Rapporteur",
-      "displayName": "Rapporteur",
+      "displayName": "Rapporteur-Comptes rendus",
       "backgroundColor": "#141413",
-      "languages": ["fr-FR", "en-US", "pt-PT", "es-ES"],
+      "languages": [
+        "fr-FR",
+        "en-US"
+      ],
       "artifactName": "Rapporteur-Store.${ext}"
     },
     "nsis": {
