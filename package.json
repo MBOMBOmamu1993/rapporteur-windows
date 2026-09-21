@@ -26,6 +26,13 @@
       "icon": "icon.png",
       "artifactName": "Rapporteur-Setup.${ext}"
     },
+    "appx": {
+      "applicationId": "Rapporteur",
+      "displayName": "Rapporteur",
+      "backgroundColor": "#141413",
+      "languages": ["fr-FR", "en-US", "pt-PT", "es-ES"],
+      "artifactName": "Rapporteur-Store.${ext}"
+    },
     "nsis": {
       "oneClick": true,
       "runAfterFinish": true,
