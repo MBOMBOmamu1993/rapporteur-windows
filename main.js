@@ -140,6 +140,9 @@ ipcMain.on("retour-accueil", chargerAccueil);
  * elle change, on le dit au lancement et un clic télécharge la nouvelle.
  */
 async function verifierMiseAJour() {
+  /* L'édition Microsoft Store se met à jour par le Store lui-même : ne jamais
+     lui proposer le .exe du site. */
+  if (process.windowsStore) return;
   try {
     const reponse = await fetch(`${SITE}/docs/bureau.json`, { cache: "no-store" });
     if (!reponse.ok) return;
