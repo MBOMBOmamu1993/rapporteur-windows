@@ -22,19 +22,6 @@ Le workflow **Construire et publier** (GitHub Actions) fait les deux à chaque
 poussée, lance chaque application sur sa machine et garde une capture d'écran
 en artefact. Avec `publier = true`, il attache les fichiers à la Release.
 
-## Windows — Microsoft Store
-
-Le `.exe` n'est pas signé : Windows affiche « Éditeur inconnu » et, depuis
-septembre 2026, Edge et Chrome retiennent le fichier (« n'est pas fréquemment
-téléchargé », SmartScreen). L'édition Store règle cela : le Store signe le
-paquet et l'installe sans téléchargement. Une fois le compte développeur
-ouvert sur Partner Center et le nom « Rapporteur » réservé, la page
-*Identité du produit* donne trois valeurs à poser en variables du dépôt
-(`STORE_IDENTITY_NAME`, `STORE_PUBLISHER`, `STORE_PUBLISHER_DISPLAY`) ;
-le job **store** produit alors `Rapporteur-Store.appx` (artefact) à déposer
-dans la soumission. Dans cette édition, `process.windowsStore` est vrai et
-l'application ne propose jamais le `.exe` du site : le Store la met à jour.
-
 ## Mac — signature et notarisation
 
 Sans signature, macOS refuse d'ouvrir l'image disque (« impossible de vérifier

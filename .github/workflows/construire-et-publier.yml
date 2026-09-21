@@ -12,17 +12,6 @@
 # Signature macOS (facultative, sinon le .dmg est non signé et macOS demande
 # d'autoriser l'ouverture) — secrets : MAC_CERT_P12 (le .p12 en base64),
 # MAC_CERT_MDP, et pour la notarisation ASC_CLE_ID, ASC_EMETTEUR_ID, ASC_CLE_P8.
-#
-# Édition Microsoft Store (Windows) : le .exe NSIS n'est pas signé, et Edge ou
-# Chrome retiennent un installateur peu téléchargé (SmartScreen). Le Store, lui,
-# signe et installe sans rien télécharger. Le job « store » construit le paquet
-# Rapporteur-Store.appx dès que les trois valeurs d'identité de Partner Center
-# sont posées en VARIABLES du dépôt (Settings → Secrets and variables → Actions
-# → Variables) : STORE_IDENTITY_NAME (Package/Identity/Name),
-# STORE_PUBLISHER (Package/Identity/Publisher, « CN=… »),
-# STORE_PUBLISHER_DISPLAY (Package/Properties/PublisherDisplayName).
-# Le paquet est un artefact à déposer dans la soumission Partner Center ; c'est
-# le Store qui le signe.
 name: Construire et publier
 
 on:
@@ -80,36 +69,6 @@ jobs:
         with:
           name: windows-${{ github.run_number }}
           path: dist/Rapporteur-Setup.exe
-
-  store:
-    name: Windows — paquet Microsoft Store
-    if: ${{ vars.STORE_IDENTITY_NAME != '' }}
-    runs-on: windows-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - run: npm ci
-      - name: Construire le paquet Store
-        shell: bash
-        env:
-          CSC_IDENTITY_AUTO_DISCOVERY: "false"
-          STORE_IDENTITY_NAME: ${{ vars.STORE_IDENTITY_NAME }}
-          STORE_PUBLISHER: ${{ vars.STORE_PUBLISHER }}
-          STORE_PUBLISHER_DISPLAY: ${{ vars.STORE_PUBLISHER_DISPLAY }}
-        run: |
-          npx electron-builder --win appx --publish never \
-            -c.appx.identityName="$STORE_IDENTITY_NAME" \
-            -c.appx.publisher="$STORE_PUBLISHER" \
-            -c.appx.publisherDisplayName="$STORE_PUBLISHER_DISPLAY"
-          ls -la dist/*.appx
-      - uses: actions/upload-artifact@v4
-        with:
-          name: store-${{ github.run_number }}
-          path: dist/Rapporteur-Store.appx
 
   mac:
     name: Mac — image disque et lancement
