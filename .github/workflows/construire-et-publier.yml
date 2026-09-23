@@ -22,7 +22,9 @@
 # STORE_PUBLISHER (Package/Identity/Publisher, « CN=… »),
 # STORE_PUBLISHER_DISPLAY (Package/Properties/PublisherDisplayName).
 # Le paquet est un artefact à déposer dans la soumission Partner Center ; c'est
-# le Store qui le signe.
+# le Store qui le signe. Ses tuiles sont dans build/appx (python tuiles-store.py) :
+# sans elles, electron-builder met ses images d'exemple et la certification refuse
+# le paquet (10.1.1.11, 23/09/2026).
 name: Construire et publier
 
 on:
@@ -31,9 +33,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Version (doit être celle de package.json), ex. 1.1.5"
+        description: "Version (doit être celle de package.json), ex. 1.1.6"
         required: true
-        default: "1.1.5"
+        default: "1.1.6"
       publier:
         description: "Attacher les fichiers à la Release vVERSION"
         type: boolean
