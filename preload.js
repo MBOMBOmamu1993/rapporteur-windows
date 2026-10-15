@@ -15,4 +15,6 @@ contextBridge.exposeInMainWorld("rapporteurBureau", {
   version,
   plateforme: "windows",
   retourAccueil: () => ipcRenderer.send("retour-accueil"),
+  // Pendant l'interprète vocal : les autres applications baissées (Windows), puis rendues.
+  autresSons: (baisser) => ipcRenderer.invoke("autres-sons", Boolean(baisser)),
 });

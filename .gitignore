@@ -4,3 +4,6 @@ dist/
 # Jamais de certificat ni de clé ici.
 *.p12
 *.p8
+
+# Construit par le workflow (csc.exe) : jamais versionné.
+sons/*.exe

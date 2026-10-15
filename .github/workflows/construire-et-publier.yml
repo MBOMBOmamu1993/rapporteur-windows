@@ -33,9 +33,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Version (doit être celle de package.json), ex. 1.1.7"
+        description: "Version (doit être celle de package.json), ex. 1.1.8"
         required: true
-        default: "1.1.7"
+        default: "1.1.8"
       publier:
         description: "Attacher les fichiers à la Release vVERSION"
         type: boolean
@@ -53,6 +53,13 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: L'outil du son des autres applications (interprète vocal)
+        shell: pwsh
+        run: |
+          & "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319\csc.exe" -nologo -target:exe -platform:anycpu -out:sons\rapporteur-sons.exe sons\sons.cs
+          if (-not (Test-Path sons\rapporteur-sons.exe)) { Write-Error "outil du son non construit" }
+          & .\sons\rapporteur-sons.exe lister
+          if ($LASTEXITCODE -ne 0) { Write-Error "outil du son en échec ($LASTEXITCODE)" }
       - name: L'interprète vocal — la capture exclut la voix de Rapporteur
         shell: bash
         run: npx electron .github/verifier-capture.js
@@ -64,6 +71,7 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force captures | Out-Null
+          if (-not (Test-Path dist\win-unpacked\resources\rapporteur-sons.exe)) { Write-Error "outil du son absent du paquet" }
           $exe = Get-ChildItem dist\win-unpacked\Rapporteur.exe | Select-Object -First 1
           $p = Start-Process -FilePath $exe.FullName -PassThru
           Start-Sleep -Seconds 18
@@ -98,6 +106,13 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: L'outil du son des autres applications (interprète vocal)
+        shell: pwsh
+        run: |
+          & "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319\csc.exe" -nologo -target:exe -platform:anycpu -out:sons\rapporteur-sons.exe sons\sons.cs
+          if (-not (Test-Path sons\rapporteur-sons.exe)) { Write-Error "outil du son non construit" }
+          & .\sons\rapporteur-sons.exe lister
+          if ($LASTEXITCODE -ne 0) { Write-Error "outil du son en échec ($LASTEXITCODE)" }
       - name: Construire le paquet Store
         shell: bash
         env:
