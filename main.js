@@ -123,7 +123,7 @@ function creerFenetre() {
   // La page qui tenait l'interprète s'en va : les autres sons reviennent.
   fenetre.webContents.on("did-start-navigation", (details) => {
     if (details && (details.isMainFrame === false || details.isSameDocument)) return;
-    if (veilleSons) rendreLesSons();
+    if (veilleSons) { niveauCourant = null; rendreLesSons(); }
   });
 }
 
@@ -177,12 +177,19 @@ function rendreLesSons() {
   return fs.existsSync(ETAT_SONS) ? outilSons("rendre", ETAT_SONS) : Promise.resolve(true);
 }
 
-ipcMain.handle("autres-sons", async (evenement, baisser) => {
-  if (!baisser) return rendreLesSons();
+let niveauCourant = null;
+ipcMain.handle("autres-sons", async (evenement, baisser, niveau) => {
+  if (!baisser) { niveauCourant = null; return rendreLesSons(); }
+  // La page dit le niveau : moins baissé pendant un enregistrement (le compte rendu
+  // capte le son de l'ordinateur APRÈS ce réglage). Un autre niveau : on rend, puis on rebaisse.
+  const n = Number(niveau);
+  const voulu = Number.isFinite(n) && n >= 0.1 && n <= 1 ? String(n) : NIVEAU_AUTRES;
+  if (niveauCourant !== null && niveauCourant !== voulu) await rendreLesSons();
   clearInterval(veilleSons);
-  const fait = await outilSons("baisser", ETAT_SONS, NIVEAU_AUTRES, NOM_PROCESSUS);
+  niveauCourant = voulu;
+  const fait = await outilSons("baisser", ETAT_SONS, voulu, NOM_PROCESSUS);
   // Une application qui se met à jouer pendant l'interprète est baissée à son tour.
-  veilleSons = setInterval(() => outilSons("baisser", ETAT_SONS, NIVEAU_AUTRES, NOM_PROCESSUS), 4000);
+  veilleSons = setInterval(() => outilSons("baisser", ETAT_SONS, voulu, NOM_PROCESSUS), 4000);
   return fait;
 });
 
