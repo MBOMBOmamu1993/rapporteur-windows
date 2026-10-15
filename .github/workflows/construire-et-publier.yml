@@ -33,9 +33,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Version (doit être celle de package.json), ex. 1.1.6"
+        description: "Version (doit être celle de package.json), ex. 1.1.7"
         required: true
-        default: "1.1.6"
+        default: "1.1.7"
       publier:
         description: "Attacher les fichiers à la Release vVERSION"
         type: boolean
@@ -53,6 +53,9 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: L'interprète vocal — la capture exclut la voix de Rapporteur
+        shell: bash
+        run: npx electron .github/verifier-capture.js
       - name: Construire l'installateur
         run: npm run dist:win
         env:
@@ -130,6 +133,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: L'interprète vocal — la capture exclut la voix de Rapporteur
+        run: npx electron .github/verifier-capture.js
 
       - name: Importer le certificat Developer ID (si fourni)
         if: ${{ env.MAC_CERT_P12 != '' }}
