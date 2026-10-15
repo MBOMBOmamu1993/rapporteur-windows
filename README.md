@@ -22,6 +22,15 @@ Le workflow **Construire et publier** (GitHub Actions) fait les deux à chaque
 poussée, lance chaque application sur sa machine et garde une capture d'écran
 en artefact. Avec `publier = true`, il attache les fichiers à la Release.
 
+**Electron 44 au moins (version 1.1.7, octobre 2026).** L'interprète vocal du
+site joue sa traduction dans l'application ; pour qu'elle n'entre pas dans le
+compte rendu, la capture du son de l'ordinateur doit exclure la voix de
+Rapporteur — Teams ou Zoom y restent. C'est la contrainte `restrictOwnAudio`,
+qu'Electron connaît à partir de la version 44 : la salle et l'interprète du
+site la détectent seuls (`getSupportedConstraints()`). Avec une version plus
+ancienne, l'interprète est refusé pendant un enregistrement. Le workflow le
+vérifie à chaque construction (`.github/verifier-capture.js`).
+
 ## Windows — Microsoft Store
 
 Le `.exe` n'est pas signé : Windows affiche « Éditeur inconnu » et, depuis
