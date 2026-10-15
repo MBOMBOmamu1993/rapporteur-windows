@@ -22,6 +22,8 @@
  */
 const { app, BrowserWindow, desktopCapturer, dialog, ipcMain, shell } = require("electron");
 const path = require("node:path");
+const fs = require("node:fs");
+const { execFile, execFileSync } = require("node:child_process");
 
 const SITE = "https://lerapporteur.com";
 const VERSION = app.getVersion();
@@ -118,6 +120,11 @@ function creerFenetre() {
 
   chargerAccueil();
   fenetre.on("closed", () => { fenetre = null; });
+  // La page qui tenait l'interprète s'en va : les autres sons reviennent.
+  fenetre.webContents.on("did-start-navigation", (details) => {
+    if (details && (details.isMainFrame === false || details.isSameDocument)) return;
+    if (veilleSons) { niveauCourant = null; rendreLesSons(); }
+  });
 }
 
 /* L'accueil de l'application vit SUR LE SITE (/bureau) : la pastille de
@@ -133,6 +140,58 @@ function chargerAccueil() {
 /* Les pages du site ramènent ici par le pont du preload quand on clique un
    lien vers la racine. */
 ipcMain.on("retour-accueil", chargerAccueil);
+
+/**
+ * L'interprète vocal du site joue sa traduction ici, mais la réunion — YouTube,
+ * Teams, Zoom — sort du même haut-parleur, et une page ne peut pas toucher au
+ * volume d'une autre application : à l'essai de Felly (15/10/2026), la voix
+ * d'origine couvrait l'interprète. Sous Windows, l'application le peut : pendant
+ * l'interprète, chaque autre application est mise à NIVEAU_AUTRES de son volume
+ * (sons/rapporteur-sons.exe, le mélangeur de Windows), puis rendue à l'arrêt.
+ *
+ * Baisser, pas couper : mesuré le 15/10/2026, le son de l'ordinateur que captent
+ * l'interprète et le compte rendu baisse AVEC le volume de l'application
+ * (Windows applique le carré du réglage : 0,4 → 16 dB de moins). Couper rendrait
+ * l'interprète et le compte rendu sourds à la réunion ; 16 dB laissent la voix de
+ * l'interprète nettement devant, et la réunion bien audible pour eux.
+ *
+ * Windows garde le volume des applications d'une fois sur l'autre : le fichier
+ * d'état sert à les rendre même après une fermeture brutale (au démarrage).
+ */
+const NIVEAU_AUTRES = "0.4";
+const OUTIL_SONS = path.join(process.resourcesPath || "", "rapporteur-sons.exe");
+const ETAT_SONS = path.join(app.getPath("userData"), "sons-baisses.txt");
+const NOM_PROCESSUS = path.parse(process.execPath).name;
+let veilleSons = null;
+
+function outilSons(...args) {
+  return new Promise((fini) => {
+    if (process.platform !== "win32" || !fs.existsSync(OUTIL_SONS)) return fini(false);
+    execFile(OUTIL_SONS, args, { timeout: 5000, windowsHide: true }, (erreur) => fini(!erreur));
+  });
+}
+
+function rendreLesSons() {
+  clearInterval(veilleSons);
+  veilleSons = null;
+  return fs.existsSync(ETAT_SONS) ? outilSons("rendre", ETAT_SONS) : Promise.resolve(true);
+}
+
+let niveauCourant = null;
+ipcMain.handle("autres-sons", async (evenement, baisser, niveau) => {
+  if (!baisser) { niveauCourant = null; return rendreLesSons(); }
+  // La page dit le niveau : moins baissé pendant un enregistrement (le compte rendu
+  // capte le son de l'ordinateur APRÈS ce réglage). Un autre niveau : on rend, puis on rebaisse.
+  const n = Number(niveau);
+  const voulu = Number.isFinite(n) && n >= 0.1 && n <= 1 ? String(n) : NIVEAU_AUTRES;
+  if (niveauCourant !== null && niveauCourant !== voulu) await rendreLesSons();
+  clearInterval(veilleSons);
+  niveauCourant = voulu;
+  const fait = await outilSons("baisser", ETAT_SONS, voulu, NOM_PROCESSUS);
+  // Une application qui se met à jouer pendant l'interprète est baissée à son tour.
+  veilleSons = setInterval(() => outilSons("baisser", ETAT_SONS, voulu, NOM_PROCESSUS), 4000);
+  return fait;
+});
 
 /**
  * La mise à jour : le site publie la version courante dans /docs/bureau.json.
@@ -179,7 +238,14 @@ app.on("second-instance", () => {
 });
 
 app.whenReady().then(() => {
+  // Une fermeture brutale pendant l'interprète a pu laisser des volumes baissés.
+  rendreLesSons();
   creerFenetre();
   verifierMiseAJour();
 });
 app.on("window-all-closed", () => app.quit());
+app.on("will-quit", () => {
+  clearInterval(veilleSons);
+  if (process.platform !== "win32" || !fs.existsSync(ETAT_SONS) || !fs.existsSync(OUTIL_SONS)) return;
+  try { execFileSync(OUTIL_SONS, ["rendre", ETAT_SONS], { timeout: 4000, windowsHide: true }); } catch { /* au prochain démarrage */ }
+});

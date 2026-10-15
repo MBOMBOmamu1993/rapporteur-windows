@@ -31,6 +31,15 @@ site la détectent seuls (`getSupportedConstraints()`). Avec une version plus
 ancienne, l'interprète est refusé pendant un enregistrement. Le workflow le
 vérifie à chaque construction (`.github/verifier-capture.js`).
 
+**Les autres sons pendant l'interprète (version 1.1.8, Windows).** La réunion —
+YouTube, Teams, Zoom — sort du même haut-parleur que l'interprète, et une page
+ne peut pas toucher au volume d'une autre application. Le petit outil
+`sons/sons.cs` (compilé par le workflow avec le `csc.exe` de Windows, livré en
+`resources/rapporteur-sons.exe`) règle le mélangeur de Windows : pendant
+l'interprète, chaque autre application passe à 0,4 de son volume (16 dB de
+moins), puis retrouve le sien. Baisser, pas couper : le son de l'ordinateur que
+captent l'interprète et le compte rendu baisse avec ce réglage (mesuré).
+
 ## Windows — Microsoft Store
 
 Le `.exe` n'est pas signé : Windows affiche « Éditeur inconnu » et, depuis
